@@ -1,0 +1,31 @@
+worker_processes auto;
+pid /run/nginx.pid;
+daemon off;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    server {
+        listen 443 ssl;
+        server_name ${DOMAIN};
+
+        ssl_certificate /etc/nginx/ssl/fullchain.cer;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+
+        location /dns-query {
+            proxy_pass http://127.0.0.1:3000;
+            proxy_set_header Host $host;
+        }
+    }
+}
+
+stream {
+    server {
+        listen 853 ssl;
+        ssl_certificate /etc/nginx/ssl/fullchain.cer;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+        proxy_pass 127.0.0.1:3000;
+    }
+}
